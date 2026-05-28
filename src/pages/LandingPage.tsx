@@ -10,7 +10,6 @@ import {
   Terminal,
   Activity,
   Compass,
-  Heart,
 } from "lucide-react";
 
 interface LandingPageProps {
