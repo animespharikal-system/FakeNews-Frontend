@@ -8,6 +8,8 @@ import {
 interface ResultData {
   type: 'text' | 'url';
   content: string;
+  prediction: string;
+  confidence: number; // 0 - 100
   score: number; // 0 - 100
   label: 'VERIFIED' | 'SUSPICIOUS' | 'CLICKBAIT' | 'FAKE NEWS';
   sensationalism: number; // percentage
@@ -23,6 +25,10 @@ interface ResultCardProps {
 }
 
 export const ResultCard: React.FC<ResultCardProps> = ({ result, onClear }) => {
+  const displayedConfidence = Number.isInteger(result.confidence)
+    ? result.confidence.toString()
+    : result.confidence.toFixed(1);
+
   const getRatingColor = (label: string) => {
     switch (label) {
       case 'VERIFIED':
@@ -47,7 +53,7 @@ export const ResultCard: React.FC<ResultCardProps> = ({ result, onClear }) => {
   // SVG Gauge calculations
   const radius = 54;
   const circumference = 2 * Math.PI * radius; // ~339.29
-  const strokeDashoffset = circumference - (result.score / 100) * circumference;
+  const strokeDashoffset = circumference - (result.confidence / 100) * circumference;
 
   return (
     <div className="glassmorphism rounded-2xl p-6 glow-border-cyber relative overflow-hidden group">
@@ -92,14 +98,14 @@ export const ResultCard: React.FC<ResultCardProps> = ({ result, onClear }) => {
                 cy="60"
                 r={radius}
                 fill="transparent"
-                stroke={getScoreCircleColor(result.score)}
+                stroke={getScoreCircleColor(result.confidence)}
                 strokeWidth="8"
                 strokeDasharray={circumference}
                 strokeDashoffset={strokeDashoffset}
                 strokeLinecap="round"
                 className="transition-all duration-1000 ease-out"
                 style={{
-                  filter: `drop-shadow(0 0 6px ${getScoreCircleColor(result.score)})`
+                  filter: `drop-shadow(0 0 6px ${getScoreCircleColor(result.confidence)})`
                 }}
               />
             </svg>
@@ -107,13 +113,13 @@ export const ResultCard: React.FC<ResultCardProps> = ({ result, onClear }) => {
             {/* Inner text score */}
             <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
               <span className="font-mono text-[9px] text-slate-500 uppercase tracking-widest font-bold">Credibility</span>
-              <span className="font-display font-black text-3xl text-white tracking-tighter my-0.5">{result.score}%</span>
+              <span className="font-display font-black text-3xl text-white tracking-tighter my-0.5">{displayedConfidence}%</span>
               <span className="font-mono text-[8px] text-slate-400 font-bold uppercase">Confidence</span>
             </div>
           </div>
 
           <div className={`mt-4 px-4 py-1.5 rounded-full border text-xs font-mono font-black tracking-widest uppercase text-center ${getRatingColor(result.label)}`}>
-            {result.label}
+            {result.prediction}
           </div>
         </div>
 
